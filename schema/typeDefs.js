@@ -17,6 +17,14 @@ const typeDefs = gql`
         password: String!
     }
 
+    input UserUpdateInput {
+        _id: ID!
+        name: String!
+        username: String!
+        password: String
+        avatar: String!
+    }
+
     type Message {
         _id: ID!
         text: String!
@@ -30,6 +38,16 @@ const typeDefs = gql`
     }
 
     input MessageCreateInput {
+        text: String!
+        userId: ID!
+        chatId: ID!
+        sent: Boolean!
+        pending: Boolean!
+        receive: Boolean!
+    }
+
+    input MessageUpdateInput {
+        _id: ID!
         text: String!
         userId: ID!
         chatId: ID!
@@ -60,7 +78,7 @@ const typeDefs = gql`
     }
 
     type UserList {
-        data: [User]
+        data: [UserResponse]
     }
 
     type ChatsList {
@@ -71,17 +89,36 @@ const typeDefs = gql`
         data: [Message]
     }
 
+    input LoginInput {
+        username: String!
+        password: String!
+    }
+
+    type UserResponse {
+        _id: ID
+        name: String
+        username: String
+        createdAt: String
+        updatedAt: String
+        avatar: String
+        accessToken: String
+        message: String
+    }
+
     type Query {
-        user(id: ID): User
-        getAllUsers(id: ID): UserList
-        getAllChats(userId: ID): ChatsList
-        getAllMessages(userId: ID): MessagesList
+        user(accessToken: String!): UserResponse
+        getAllUsers(accessToken: String!): UserList
+        getAllChats(accessToken: String!): ChatsList
+        getAllMessages(accessToken: String!): MessagesList
     }
 
     type Mutation {
-        userCreate(data: UserCreateInput): User
-        messageCreate(data: MessageCreateInput): Message
+        userCreate(data: UserCreateInput): UserResponse
+        userUpdate(accessToken: String!, data: UserUpdateInput): UserResponse
+        messageCreate(accessToken: String!, data: MessageCreateInput): Message
+        messageUpdate(accessToken: String!, data: MessageUpdateInput): Message
         chatCreate(data: ChatInput): Chat
+        login(data: LoginInput): UserResponse
     }
 `;
 

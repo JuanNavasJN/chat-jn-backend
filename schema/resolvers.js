@@ -13,7 +13,9 @@ const resolvers = {
     Query: {
         async user(_, { accessToken }) {
             const verification = verifyToken(accessToken);
-            if (verification === false) return null;
+            if (verification === false) {
+                throw new Error('accessToken invalid');
+            }
 
             return verification.user;
         },
@@ -23,8 +25,9 @@ const resolvers = {
         },
         async getAllChats(_, { accessToken }) {
             const verification = verifyToken(accessToken);
-            if (verification === false) return null;
-
+            if (verification === false) {
+                throw new Error('accessToken invalid');
+            }
             let chats = await Chat.find({})
                 .populate('from', 'name')
                 .populate('to', 'name')
@@ -41,8 +44,9 @@ const resolvers = {
         },
         async getAllMessages(_, { accessToken }) {
             const verification = verifyToken(accessToken);
-            if (verification === false) return null;
-
+            if (verification === false) {
+                throw new Error('accessToken invalid');
+            }
             const messages = await Message.find({}).exec();
 
             // messages[1].text = cryptr.decrypt(messages[1].text);
@@ -66,8 +70,9 @@ const resolvers = {
         },
         async messageCreate(_, { data, accessToken }) {
             const verification = verifyToken(accessToken);
-            if (verification === false) return null;
-
+            if (verification === false) {
+                throw new Error('accessToken invalid');
+            }
             const { text, userId, chatId, sent, pending, receive } = data;
             let message = new Message({
                 text: cryptr.encrypt(text),
@@ -93,8 +98,9 @@ const resolvers = {
         },
         async messageUpdate(_, { data, accessToken }) {
             const verification = verifyToken(accessToken);
-            if (verification === false) return null;
-
+            if (verification === false) {
+                throw new Error('accessToken invalid');
+            }
             const { _id, text, userId, chatId, sent, pending, receive } = data;
 
             const message = await Message.findByIdAndUpdate(
@@ -114,8 +120,9 @@ const resolvers = {
         },
         async userUpdate(_, { data, accessToken }) {
             const verification = verifyToken(accessToken);
-            if (verification === false) return null;
-
+            if (verification === false) {
+                throw new Error('accessToken invalid');
+            }
             const { _id, name, username, avatar, password } = data;
 
             let user;

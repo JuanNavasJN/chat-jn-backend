@@ -14,42 +14,90 @@ const resolvers = {
         async user(_, { accessToken }) {
             const verification = verifyToken(accessToken);
             if (verification === false) {
-                throw new Error('accessToken invalid');
+                throw new Error('Invalid accessToken');
             }
 
             return verification.user;
         },
-        async getAllUsers() {
+        async getAllUsers(_, { accessToken }) {
+            const verification = verifyToken(accessToken);
+            if (verification === false) {
+                throw new Error('Invalid accessToken');
+            }
+
             const all = await User.find({}).exec();
             return { data: all };
         },
         async getAllChats(_, { accessToken }) {
             const verification = verifyToken(accessToken);
             if (verification === false) {
-                throw new Error('accessToken invalid');
+                throw new Error('Invalid accessToken');
             }
-            let chats = await Chat.find({})
-                .populate('from', 'name')
-                .populate('to', 'name')
+            let chats = await Chat.find({ from: verification.user._id })
+                .populate('from', 'name username')
+                .populate('to', 'name username')
                 .exec();
 
-            chats = chats.map(e => ({
-                _id: e._id,
-                from: e.from.name,
-                to: e.to.name,
-                createdAt: e.createdAt,
-                updatedAt: e.updatedAt,
-            }));
+            // ------------------------- Validation for Admin ------------------------------
+            //---- If username is not equal to 'juannavas' return only
+            //    chat with e.to.username is equal to 'juannavas'
+            if (verification.user.username !== 'juannavas') {
+                let allChats = [];
+                for await (let e of chats) {
+                    if (e.to.username === 'juannavas') {
+                        let messages = await Message.find({
+                            chatId: e._id,
+                        }).exec();
+                        allChats.push({
+                            _id: e._id,
+                            from: e.from.name,
+                            to: e.to.name,
+                            createdAt: e.createdAt,
+                            updatedAt: e.updatedAt,
+                            messages,
+                        });
+                    }
+                }
+                chats = allChats;
+            } else {
+                let allChats = [];
+                for await (let e of chats) {
+                    let messages = await Message.find({ chatId: e._id }).exec();
+                    allChats.push({
+                        _id: e._id,
+                        from: e.from.name,
+                        to: e.to.name,
+                        createdAt: e.createdAt,
+                        updatedAt: e.updatedAt,
+                        messages,
+                    });
+                }
+                chats = allChats;
+            }
+
             return { data: chats };
         },
         async getAllMessages(_, { accessToken }) {
             const verification = verifyToken(accessToken);
             if (verification === false) {
-                throw new Error('accessToken invalid');
+                throw new Error('Invalid accessToken');
             }
             const messages = await Message.find({}).exec();
 
             // messages[1].text = cryptr.decrypt(messages[1].text);
+
+            return { data: messages };
+        },
+        async getMessagesByChatId(_, { accessToken, chatId }) {
+            const verification = verifyToken(accessToken);
+            if (verification === false) {
+                throw new Error('Invalid accessToken');
+            }
+
+            let messages = await Message.find({
+                chatId,
+                userId: verification.user._id,
+            }).exec();
 
             return { data: messages };
         },
@@ -71,7 +119,7 @@ const resolvers = {
         async messageCreate(_, { data, accessToken }) {
             const verification = verifyToken(accessToken);
             if (verification === false) {
-                throw new Error('accessToken invalid');
+                throw new Error('Invalid accessToken');
             }
             const { text, userId, chatId, sent, pending, receive } = data;
             let message = new Message({
@@ -99,7 +147,7 @@ const resolvers = {
         async messageUpdate(_, { data, accessToken }) {
             const verification = verifyToken(accessToken);
             if (verification === false) {
-                throw new Error('accessToken invalid');
+                throw new Error('Invalid accessToken');
             }
             const { _id, text, userId, chatId, sent, pending, receive } = data;
 
@@ -121,7 +169,7 @@ const resolvers = {
         async userUpdate(_, { data, accessToken }) {
             const verification = verifyToken(accessToken);
             if (verification === false) {
-                throw new Error('accessToken invalid');
+                throw new Error('Invalid accessToken');
             }
             const { _id, name, username, avatar, password } = data;
 
@@ -158,6 +206,9 @@ const resolvers = {
 
             const user = await User.findOne({ username }).exec();
 
+            if (user === null)
+                throw new Error('Incorrect username or password');
+
             const passwordValid = bcrypt.compareSync(password, user.password);
 
             if (passwordValid === true) {
@@ -165,7 +216,7 @@ const resolvers = {
                 return user;
             }
 
-            return null;
+            throw new Error('Incorrect username or password');
         },
     },
 };

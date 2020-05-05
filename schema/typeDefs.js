@@ -69,6 +69,7 @@ const typeDefs = gql`
         _id: ID
         from: String
         to: String
+        messages: [Message]
         createdAt: String
         updatedAt: String
     }
@@ -111,15 +112,16 @@ const typeDefs = gql`
         getAllUsers(accessToken: String!): UserList
         getAllChats(accessToken: String!): ChatsList
         getAllMessages(accessToken: String!): MessagesList
+        getMessagesByChatId(accessToken: String!, chatId: ID!): MessagesList
     }
 
     type Mutation {
-        userCreate(data: UserCreateInput): UserResponse
-        userUpdate(accessToken: String!, data: UserUpdateInput): UserResponse
-        messageCreate(accessToken: String!, data: MessageCreateInput): Message
-        messageUpdate(accessToken: String!, data: MessageUpdateInput): Message
-        chatCreate(data: ChatInput): Chat
-        login(data: LoginInput): UserResponse
+        userCreate(data: UserCreateInput!): UserResponse
+        userUpdate(accessToken: String!, data: UserUpdateInput!): UserResponse
+        messageCreate(accessToken: String!, data: MessageCreateInput!): Message
+        messageUpdate(accessToken: String!, data: MessageUpdateInput!): Message
+        chatCreate(data: ChatInput!): Chat
+        login(data: LoginInput!): UserResponse
     }
 `;
 

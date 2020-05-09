@@ -107,6 +107,16 @@ const typeDefs = gql`
         message: String
     }
 
+    # type File {
+    #     filename: String!
+    #     mimetype: String!
+    #     encoding: String!
+    # }
+
+    type File {
+        uri: String!
+    }
+
     type Query {
         user(accessToken: String!): UserResponse
         getAllUsers(accessToken: String!): UserList
@@ -122,6 +132,7 @@ const typeDefs = gql`
         messageUpdate(accessToken: String!, data: MessageUpdateInput!): Message
         chatCreate(data: ChatInput!): Chat
         login(data: LoginInput!): UserResponse
+        uploadFile(file: Upload!): File!
     }
 `;
 

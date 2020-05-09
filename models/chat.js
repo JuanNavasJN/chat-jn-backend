@@ -3,13 +3,17 @@ let Schema = mongoose.Schema;
 
 let chatSchema = new Schema(
     {
-        from: {
-            type: Schema.Types.ObjectId,
-            ref: 'User',
+        name: {
+            type: String,
         },
-        to: {
-            type: Schema.Types.ObjectId,
-            ref: 'User',
+        people: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'User',
+            },
+        ],
+        private: {
+            type: Boolean,
         },
     },
     { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } }

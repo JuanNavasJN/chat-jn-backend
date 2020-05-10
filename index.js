@@ -21,7 +21,12 @@ const { ApolloServer } = require('apollo-server');
 const { typeDefs } = require('./schema/typeDefs');
 const { resolvers } = require('./schema/resolvers');
 
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    introspection: true,
+    playground: true,
+});
 
 server.listen(process.env.PORT).then(({ url }) => {
     console.log(`🚀  Server ready at ${url}`);

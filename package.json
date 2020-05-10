@@ -7,6 +7,9 @@
         "start": "node index",
         "dev": "nodemon index"
     },
+    "engines": {
+        "node": "12.*"
+    },
     "dependencies": {
         "apollo-server": "^2.13.0",
         "bcryptjs": "^2.4.3",

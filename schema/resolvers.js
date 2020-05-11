@@ -7,7 +7,7 @@ const {
     userCreate,
 } = require('../controllers/user');
 
-const { chatCreate, getAllChats } = require('../controllers/chat');
+const { chatCreate, getChats } = require('../controllers/chat');
 
 const {
     getAllMessages,
@@ -28,7 +28,7 @@ const resolvers = {
     Query: {
         user,
         getAllUsers,
-        getAllChats,
+        getChats,
         getAllMessages,
         getMessagesByChatId,
     },

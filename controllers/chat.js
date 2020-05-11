@@ -1,16 +1,25 @@
 const Chat = require('../models/chat');
+const Message = require('../models/message');
+
 const mongoose = require('mongoose');
 
 const { verifyToken } = require('../auth/jwt');
 
-async function getAllChats(_, { accessToken }) {
+async function getChats(_, { accessToken }) {
     const verification = verifyToken(accessToken);
     if (verification === false) {
         throw new Error('Invalid accessToken');
     }
-    let chats = await Chat.find({ from: verification.user._id })
-        .populate('from', 'name username')
-        .populate('to', 'name username')
+
+    const currentId = verification.user._id;
+
+    let chats = await Chat.find(
+        {
+            people: currentId,
+        },
+        'people private'
+    )
+        .populate('people', 'name username avatar')
         .exec();
 
     // ------------------------- Validation for Admin ------------------------------
@@ -19,14 +28,17 @@ async function getAllChats(_, { accessToken }) {
     if (verification.user.username !== 'juannavas') {
         let allChats = [];
         for await (let e of chats) {
-            if (e.to.username === 'juannavas') {
+            let chat = e.people.find(user => user._id != currentId);
+            if (chat.username === 'juannavas') {
                 let messages = await Message.find({
                     chatId: e._id,
-                }).exec();
+                })
+                    .populate('user')
+                    .exec();
                 allChats.push({
                     _id: e._id,
-                    from: e.from.name,
-                    to: e.to.name,
+                    name: chat.name,
+                    avatar: chat.avatar,
                     createdAt: e.createdAt,
                     updatedAt: e.updatedAt,
                     messages,
@@ -37,15 +49,20 @@ async function getAllChats(_, { accessToken }) {
     } else {
         let allChats = [];
         for await (let e of chats) {
-            let messages = await Message.find({ chatId: e._id }).exec();
-            allChats.push({
-                _id: e._id,
-                from: e.from.name,
-                to: e.to.name,
-                createdAt: e.createdAt,
-                updatedAt: e.updatedAt,
-                messages,
-            });
+            if (e.private === true) {
+                let messages = await Message.find({ chatId: e._id })
+                    .populate('user')
+                    .exec();
+                let chat = e.people.find(user => user._id != currentId);
+                allChats.push({
+                    _id: e._id,
+                    avatar: chat.avatar,
+                    name: chat.name,
+                    createdAt: e.createdAt,
+                    updatedAt: e.updatedAt,
+                    messages,
+                });
+            }
         }
         chats = allChats;
     }
@@ -66,5 +83,5 @@ async function chatCreate(_, { data }) {
 
 module.exports = {
     chatCreate,
-    getAllChats,
+    getChats,
 };

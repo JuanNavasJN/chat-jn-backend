@@ -6,7 +6,7 @@ let messageSchema = new Schema(
         text: {
             type: String,
         },
-        userId: {
+        user: {
             type: Schema.Types.ObjectId,
             ref: 'User',
         },

@@ -67,8 +67,8 @@ const typeDefs = gql`
 
     type ChatWithNames {
         _id: ID
-        from: String
-        to: String
+        name: String!
+        avatar: String
         messages: [Message]
         createdAt: String
         updatedAt: String
@@ -120,7 +120,7 @@ const typeDefs = gql`
     type Query {
         user(accessToken: String!): UserResponse
         getAllUsers(accessToken: String!): UserList
-        getAllChats(accessToken: String!): ChatsList
+        getChats(accessToken: String!): ChatsList
         getAllMessages(accessToken: String!): MessagesList
         getMessagesByChatId(accessToken: String!, chatId: ID!): MessagesList
     }
